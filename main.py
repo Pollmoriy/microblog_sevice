@@ -1,7 +1,4 @@
-from typing import List
-
-from fastapi import FastAPI, HTTPException
-from sqlalchemy.future import select
+from fastapi import FastAPI
 from sqlalchemy import desc
 import models
 import schemas
