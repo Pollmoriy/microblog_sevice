@@ -167,3 +167,50 @@ async def get_user_profile_service(db, user_id: int):
             ],
         }
     }
+
+
+async def get_feed_service(db, user_id: int):
+    result = await db.execute(
+        select(Follow.following_id).where(Follow.follower_id == user_id)
+    )
+
+    following_ids = [row[0] for row in result.all()]
+
+    if not following_ids:
+        return {"result": True, "tweets": []}
+
+    tweets_result = await db.execute(
+        select(Tweet).where(Tweet.author_id.in_(following_ids)).options(
+            selectinload(Tweet.likes),
+            selectinload(Tweet.tweet_media).selectinload(TweetMedia.media),
+            selectinload(Tweet.author),
+        )
+    )
+
+    tweets = tweets_result.scalars().all()
+
+    def build_tweet(tweet):
+        return {
+            "id": tweet.id,
+            "content": tweet.content,
+            "attachments": [
+                tm.media.file_path for tm in tweet.tweet_media
+            ],
+            "author": {
+                "id": tweet.author.id,
+                "name": tweet.author.name,
+            },
+            "likes": [
+                {
+                    "user_id": like.user_id,
+                    "name": like.user.name if like.user else None
+                }
+                for like in tweet.likes
+            ],
+        }
+
+    tweets_sorted = sorted(tweets, key=lambda t: len(t.likes), reverse=True)
+    return {
+        "result": True,
+        "tweets": [build_tweet(t) for t in tweets_sorted]
+    }
