@@ -6,7 +6,7 @@ from database import get_db
 
 
 async def get_current_user(
-    api_key: str = Header(...),
+    api_key: str = Header(..., alias="api_key"),
     db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(

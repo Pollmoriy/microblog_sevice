@@ -1,33 +1,37 @@
-import pytest
-from httpx import AsyncClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from main import app
-from database import get_db
-import models
+from database import Base, get_db
 
-TEST_DB_URL = "postgresql+asyncpg://postgres:postgres@db:5432/test_db"
+TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
-engine = create_async_engine(TEST_DB_URL, echo=False)
-TestingSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
-
-
-@pytest.fixture(scope="session", autouse=True)
-async def prepare_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.drop_all)
-        await conn.run_sync(models.Base.metadata.create_all)
-
+engine_test = create_async_engine(TEST_DATABASE_URL)
+TestingSessionLocal = async_sessionmaker(
+    bind=engine_test,
+    expire_on_commit=False
+)
 
 async def override_get_db():
     async with TestingSessionLocal() as session:
         yield session
 
-
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def prepare_db():
+    async with engine_test.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+@pytest_asyncio.fixture
 async def client():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://test"
+    ) as ac:
         yield ac
