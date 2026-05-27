@@ -127,3 +127,43 @@ async def unfollow_user_service(db, follower_id: int, following_id: int):
 
     await db.delete(follow)
     await db.commit()
+
+
+async def get_user_profile_service(db, user_id: int):
+    user = await db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    followers_result = await db.execute(
+        select(Follow).where(Follow.following_id == user_id)
+    )
+
+    following_result = await db.execute(
+        select(Follow).where(Follow.follower_id == user_id)
+    )
+
+    followers = followers_result.scalars().all()
+    following = following_result.scalars().all()
+
+    return {
+        "result": True,
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "followers": [
+                {
+                    "id": f.follower_id,
+                    "name": (await db.get(User, f.follower_id)).name
+                }
+                for f in followers
+            ],
+            "following": [
+                {
+                    "id": f.following_id,
+                    "name": (await db.get(User, f.following_id)).name
+                }
+                for f in following
+            ],
+        }
+    }

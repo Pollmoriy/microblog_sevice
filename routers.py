@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from dependencies import get_current_user
 from schemas import TweetCreate, TweetResponse, MediaResponse
-from services import save_media_service, create_tweet_service, delete_tweet_service, like_tweet_service, unlike_tweet_service, follow_user_service, unfollow_user_service
+from services import save_media_service, create_tweet_service, delete_tweet_service, like_tweet_service, unlike_tweet_service, follow_user_service, unfollow_user_service, get_user_profile_service
 
 
 router = APIRouter(tags=["API"])
@@ -47,3 +47,12 @@ async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_
 async def unfollow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     await unfollow_user_service(db, current_user.id, user_id)
     return {"result": True}
+
+@router.get("/api/users/me")
+async def get_me(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await get_user_profile_service(db, current_user.id)
+
+
+@router.get("/api/users/{user_id}")
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await get_user_profile_service(db, user_id)
