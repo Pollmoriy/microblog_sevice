@@ -3,7 +3,7 @@ from sqlalchemy.orm import declarative_base
 from typing import AsyncGenerator
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "postgresql+asyncpg://admin:admin@postgres:5432/microblog"
+DATABASE_URL = "postgresql+asyncpg://admin:admin@localhost:5432/microblog"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 

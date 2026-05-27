@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from sqlalchemy import desc
+
 import models
-import schemas
-from database import engine, session
+
+from database import engine
+from routers import router
+
 
 app = FastAPI()
 
@@ -13,7 +15,4 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    await session.close()
-    await engine.dispose()
+app.include_router(router)
