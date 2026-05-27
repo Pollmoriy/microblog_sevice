@@ -16,3 +16,6 @@ async def startup_event():
 
 
 app.include_router(router)
+print("APP ROUTES:")
+for r in app.routes:
+    print(r.path)
