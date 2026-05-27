@@ -4,55 +4,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from dependencies import get_current_user
 from schemas import TweetCreate, TweetResponse, MediaResponse
-from services import save_media_service, create_tweet_service, delete_tweet_service, like_tweet_service, unlike_tweet_service
+from services import save_media_service, create_tweet_service, delete_tweet_service, like_tweet_service, unlike_tweet_service, follow_user_service, unfollow_user_service
 
 
 router = APIRouter(tags=["API"])
 
 @router.post("/api/tweets", response_model=TweetResponse, status_code=status.HTTP_201_CREATED)
-async def create_tweet(
-    tweet_data: TweetCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user)):
-    tweet = await create_tweet_service(
-        tweet_data=tweet_data,
-        current_user=current_user,
-        db=db,
-    )
+async def create_tweet(tweet_data: TweetCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    tweet = await create_tweet_service(tweet_data=tweet_data, current_user=current_user, db=db)
+    return TweetResponse(tweet_id=tweet.id)
 
-    return TweetResponse(
-        tweet_id=tweet.id,
-    )
-
-@router.post(
-    "/api/medias",
-    response_model=MediaResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def upload_media(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user)):
-    media = await save_media_service(
-        file=file,
-        db=db,
-    )
-
-    return MediaResponse(
-        media_id=media.id,
-    )
+@router.post("/api/medias", response_model=MediaResponse, status_code=status.HTTP_201_CREATED)
+async def upload_media(file: UploadFile = File(...), db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    media = await save_media_service(file=file, db=db)
+    return MediaResponse(media_id=media.id)
 
 @router.delete("/api/tweets/{tweet_id}")
-async def delete_tweet(
-    tweet_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user)):
-    await delete_tweet_service(
-        tweet_id=tweet_id,
-        current_user=current_user,
-        db=db,
-    )
-
+async def delete_tweet(tweet_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    await delete_tweet_service(tweet_id=tweet_id, сurrent_user=current_user, db=db)
     return {"result": True}
 
 
@@ -63,10 +32,18 @@ async def like_tweet(tweet_id: int, db: AsyncSession = Depends(get_db), current_
 
 
 @router.delete("/api/tweets/{tweet_id}/likes")
-async def unlike_tweet(
-    tweet_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
+async def unlike_tweet(tweet_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     await unlike_tweet_service(db, current_user.id, tweet_id)
+    return {"result": True}
+
+
+@router.post("/api/users/{user_id}/follow")
+async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    await follow_user_service(db, current_user.id, user_id)
+    return {"result": True}
+
+
+@router.delete("/api/users/{user_id}/follow")
+async def unfollow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    await unfollow_user_service(db, current_user.id, user_id)
     return {"result": True}

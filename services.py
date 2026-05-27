@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models import Media, Tweet, TweetMedia, Like
+from models import Media, Tweet, TweetMedia, Like, Follow, User
 
 UPLOAD_DIR = "app/media"
 
@@ -96,4 +96,34 @@ async def unlike_tweet_service(db, user_id: int, tweet_id: int):
         raise HTTPException(status_code=404, detail="Like not found")
 
     await db.delete(like)
+    await db.commit()
+
+
+async def follow_user_service(db, follower_id: int, following_id: int):
+    if follower_id == following_id:
+        raise HTTPException(status_code=400, detail="Cannot follow yourself")
+
+    user = await db.get(User, following_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    follow = Follow(follower_id=follower_id, following_id=following_id)
+    db.add(follow)
+
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Already following")
+
+
+async def unfollow_user_service(db, follower_id: int, following_id: int):
+    result = await db.execute(
+        select(Follow).where(Follow.follower_id == follower_id, Follow.following_id == following_id))
+    follow = result.scalar_one_or_none()
+
+    if not follow:
+        raise HTTPException(status_code=404, detail="Follow not found")
+
+    await db.delete(follow)
     await db.commit()
