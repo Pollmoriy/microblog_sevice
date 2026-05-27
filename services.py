@@ -5,6 +5,7 @@ from fastapi import UploadFile, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from utils.auth import generate_api_key
 
 from models import Media, Tweet, TweetMedia, Like, Follow, User
 
@@ -214,3 +215,28 @@ async def get_feed_service(db, user_id: int):
         "result": True,
         "tweets": [build_tweet(t) for t in tweets_sorted]
     }
+
+
+async def create_user_service(db: AsyncSession, name: str):
+    api_key = generate_api_key()
+
+    user = User(name=name, api_key=api_key)
+
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    return user
+
+
+async def login_user_service(db: AsyncSession, api_key: str):
+    result = await db.execute(
+        select(User).where(User.api_key == api_key)
+    )
+
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    return user

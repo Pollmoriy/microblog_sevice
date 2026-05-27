@@ -17,3 +17,14 @@ class ErrorResponse(BaseModel):
     result: Literal[False] = False
     error_type: str
     error_message: str
+
+class UserCreate(BaseModel):
+    name: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    api_key: str
+
+class LoginRequest(BaseModel):
+    api_key: str
