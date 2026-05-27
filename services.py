@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models import Media, Tweet, TweetMedia
+from models import Media, Tweet, TweetMedia, Like
 
 UPLOAD_DIR = "app/media"
 
@@ -68,4 +68,32 @@ async def delete_tweet_service(tweet_id: int, current_user, db: AsyncSession) ->
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can delete only your own tweets")
 
     await db.delete(tweet)
+    await db.commit()
+
+
+async def like_tweet_service(db, user_id: int, tweet_id: int):
+    tweet = await db.get(Tweet, tweet_id)
+    if not tweet:
+        raise HTTPException(status_code=404, detail="Tweet not found")
+
+    like = Like(user_id=user_id, tweet_id=tweet_id)
+    db.add(like)
+
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Already liked")
+
+
+async def unlike_tweet_service(db, user_id: int, tweet_id: int):
+    result = await db.execute(
+        select(Like).where(Like.user_id == user_id, Like.tweet_id == tweet_id)
+    )
+
+    like = result.scalar_one_or_none()
+    if not like:
+        raise HTTPException(status_code=404, detail="Like not found")
+
+    await db.delete(like)
     await db.commit()

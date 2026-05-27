@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from dependencies import get_current_user
 from schemas import TweetCreate, TweetResponse, MediaResponse
-from services import save_media_service, create_tweet_service, delete_tweet_service
+from services import save_media_service, create_tweet_service, delete_tweet_service, like_tweet_service, unlike_tweet_service
+
 
 router = APIRouter(tags=["API"])
 
@@ -52,4 +53,20 @@ async def delete_tweet(
         db=db,
     )
 
+    return {"result": True}
+
+
+@router.post("/api/tweets/{tweet_id}/likes")
+async def like_tweet(tweet_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    await like_tweet_service(db, current_user.id, tweet_id)
+    return {"result": True}
+
+
+@router.delete("/api/tweets/{tweet_id}/likes")
+async def unlike_tweet(
+    tweet_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    await unlike_tweet_service(db, current_user.id, tweet_id)
     return {"result": True}
