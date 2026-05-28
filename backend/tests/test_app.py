@@ -1,12 +1,10 @@
-import pytest
 import io
+
+import pytest
 
 
 async def create_user(client, name):
-    response = await client.post(
-        "/api/users",
-        json={"name": name}
-    )
+    response = await client.post("/api/users", json={"name": name})
 
     assert response.status_code == 200
 
@@ -31,11 +29,8 @@ async def test_create_tweet(client):
 
     response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "hello test tweet",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user["api_key"]}
+        json={"tweet_data": "hello test tweet", "tweet_media_ids": []},
+        headers={"api_key": user["api_key"]},
     )
 
     assert response.status_code == 201
@@ -52,11 +47,8 @@ async def test_like_tweet(client):
 
     tweet_response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "like me",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user1["api_key"]}
+        json={"tweet_data": "like me", "tweet_media_ids": []},
+        headers={"api_key": user1["api_key"]},
     )
 
     assert tweet_response.status_code == 201
@@ -64,8 +56,7 @@ async def test_like_tweet(client):
     tweet_id = tweet_response.json()["tweet_id"]
 
     response = await client.post(
-        f"/api/tweets/{tweet_id}/likes",
-        headers={"api_key": user2["api_key"]}
+        f"/api/tweets/{tweet_id}/likes", headers={"api_key": user2["api_key"]}
     )
 
     assert response.status_code == 200
@@ -78,8 +69,7 @@ async def test_follow_user(client):
     user2 = await create_user(client, "B")
 
     response = await client.post(
-        f"/api/users/{user2['id']}/follow",
-        headers={"api_key": user1["api_key"]}
+        f"/api/users/{user2['id']}/follow", headers={"api_key": user1["api_key"]}
     )
 
     assert response.status_code == 200
@@ -92,27 +82,20 @@ async def test_feed(client):
     user2 = await create_user(client, "B")
 
     follow_response = await client.post(
-        f"/api/users/{user2['id']}/follow",
-        headers={"api_key": user1["api_key"]}
+        f"/api/users/{user2['id']}/follow", headers={"api_key": user1["api_key"]}
     )
 
     assert follow_response.status_code == 200
 
     tweet_response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "feed tweet",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user2["api_key"]}
+        json={"tweet_data": "feed tweet", "tweet_media_ids": []},
+        headers={"api_key": user2["api_key"]},
     )
 
     assert tweet_response.status_code == 201
 
-    response = await client.get(
-        "/api/tweets",
-        headers={"api_key": user1["api_key"]}
-    )
+    response = await client.get("/api/tweets", headers={"api_key": user1["api_key"]})
 
     assert response.status_code == 200
 
@@ -128,11 +111,8 @@ async def test_delete_own_tweet(client):
 
     tweet_response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "to delete",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user["api_key"]}
+        json={"tweet_data": "to delete", "tweet_media_ids": []},
+        headers={"api_key": user["api_key"]},
     )
 
     assert tweet_response.status_code == 201
@@ -140,8 +120,7 @@ async def test_delete_own_tweet(client):
     tweet_id = tweet_response.json()["tweet_id"]
 
     response = await client.delete(
-        f"/api/tweets/{tweet_id}",
-        headers={"api_key": user["api_key"]}
+        f"/api/tweets/{tweet_id}", headers={"api_key": user["api_key"]}
     )
 
     assert response.status_code == 200
@@ -155,11 +134,8 @@ async def test_delete_foreign_tweet_forbidden(client):
 
     tweet_response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "not yours",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user1["api_key"]}
+        json={"tweet_data": "not yours", "tweet_media_ids": []},
+        headers={"api_key": user1["api_key"]},
     )
 
     assert tweet_response.status_code == 201
@@ -167,8 +143,7 @@ async def test_delete_foreign_tweet_forbidden(client):
     tweet_id = tweet_response.json()["tweet_id"]
 
     response = await client.delete(
-        f"/api/tweets/{tweet_id}",
-        headers={"api_key": user2["api_key"]}
+        f"/api/tweets/{tweet_id}", headers={"api_key": user2["api_key"]}
     )
 
     assert response.status_code == 403
@@ -183,7 +158,7 @@ async def test_upload_media(client):
     response = await client.post(
         "/api/medias",
         files={"file": ("test.png", file, "image/png")},
-        headers={"api_key": user["api_key"]}
+        headers={"api_key": user["api_key"]},
     )
 
     assert response.status_code == 201
@@ -196,11 +171,7 @@ async def test_upload_media(client):
 @pytest.mark.asyncio
 async def test_missing_api_key(client):
     response = await client.post(
-        "/api/tweets",
-        json={
-            "tweet_data": "fail",
-            "tweet_media_ids": []
-        }
+        "/api/tweets", json={"tweet_data": "fail", "tweet_media_ids": []}
     )
 
     assert response.status_code in [401, 422]
@@ -211,8 +182,7 @@ async def test_like_nonexistent_tweet(client):
     user = await create_user(client, "A")
 
     response = await client.post(
-        "/api/tweets/999999/likes",
-        headers={"api_key": user["api_key"]}
+        "/api/tweets/999999/likes", headers={"api_key": user["api_key"]}
     )
 
     assert response.status_code == 404
@@ -225,11 +195,8 @@ async def test_double_like(client):
 
     tweet_response = await client.post(
         "/api/tweets",
-        json={
-            "tweet_data": "like me",
-            "tweet_media_ids": []
-        },
-        headers={"api_key": user1["api_key"]}
+        json={"tweet_data": "like me", "tweet_media_ids": []},
+        headers={"api_key": user1["api_key"]},
     )
 
     assert tweet_response.status_code == 201
@@ -237,15 +204,13 @@ async def test_double_like(client):
     tweet_id = tweet_response.json()["tweet_id"]
 
     first_like = await client.post(
-        f"/api/tweets/{tweet_id}/likes",
-        headers={"api_key": user2["api_key"]}
+        f"/api/tweets/{tweet_id}/likes", headers={"api_key": user2["api_key"]}
     )
 
     assert first_like.status_code == 200
 
     response = await client.post(
-        f"/api/tweets/{tweet_id}/likes",
-        headers={"api_key": user2["api_key"]}
+        f"/api/tweets/{tweet_id}/likes", headers={"api_key": user2["api_key"]}
     )
 
     assert response.status_code == 400
@@ -256,8 +221,7 @@ async def test_follow_self(client):
     user = await create_user(client, "A")
 
     response = await client.post(
-        f"/api/users/{user['id']}/follow",
-        headers={"api_key": user["api_key"]}
+        f"/api/users/{user['id']}/follow", headers={"api_key": user["api_key"]}
     )
 
     assert response.status_code == 400
@@ -269,15 +233,13 @@ async def test_double_follow(client):
     user2 = await create_user(client, "B")
 
     first_follow = await client.post(
-        f"/api/users/{user2['id']}/follow",
-        headers={"api_key": user1["api_key"]}
+        f"/api/users/{user2['id']}/follow", headers={"api_key": user1["api_key"]}
     )
 
     assert first_follow.status_code == 200
 
     response = await client.post(
-        f"/api/users/{user2['id']}/follow",
-        headers={"api_key": user1["api_key"]}
+        f"/api/users/{user2['id']}/follow", headers={"api_key": user1["api_key"]}
     )
 
     assert response.status_code == 400
@@ -287,10 +249,7 @@ async def test_double_follow(client):
 async def test_get_me(client):
     user = await create_user(client, "A")
 
-    response = await client.get(
-        "/api/users/me",
-        headers={"api_key": user["api_key"]}
-    )
+    response = await client.get("/api/users/me", headers={"api_key": user["api_key"]})
 
     assert response.status_code == 200
 
@@ -304,8 +263,7 @@ async def test_get_user_profile(client):
     user = await create_user(client, "A")
 
     response = await client.get(
-        f"/api/users/{user['id']}",
-        headers={"api_key": user["api_key"]}
+        f"/api/users/{user['id']}", headers={"api_key": user["api_key"]}
     )
 
     assert response.status_code == 200
