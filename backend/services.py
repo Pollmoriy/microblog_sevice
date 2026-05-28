@@ -9,7 +9,7 @@ from utils.auth import generate_api_key
 
 from models import Media, Tweet, TweetMedia, Like, Follow, User
 
-UPLOAD_DIR = "app/media"
+UPLOAD_DIR = "../frontend/app/media"
 
 
 async def create_tweet_service(tweet_data, current_user, db: AsyncSession) -> Tweet:

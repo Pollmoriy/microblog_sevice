@@ -4,9 +4,8 @@ from sqlalchemy import select
 import models
 from database import get_db
 
-
 async def get_current_user(
-    api_key: str = Header(..., alias="api_key"),
+    api_key: str = Header(..., alias="api-key"),
     db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(

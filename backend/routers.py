@@ -97,13 +97,3 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         name=new_user.name,
         api_key=new_user.api_key
     )
-
-@router.post("/login", response_model=UserResponse)
-async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
-    user = await login_user_service(db, data.api_key)
-
-    return UserResponse(
-        id=user.id,
-        name=user.name,
-        api_key=user.api_key
-    )

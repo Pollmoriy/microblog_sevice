@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:16
@@ -21,15 +19,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
 
-    restart: unless-stopped
-
-
-  app:
-    build: .
-
-    container_name: microblog_app
+  backend:
+    build: ./backend
+    container_name: microblog_backend
 
     ports:
       - "8000:8000"
@@ -42,13 +35,20 @@ services:
       DATABASE_URL: postgresql+asyncpg://admin:admin@db:5432/microblog
 
     volumes:
-      - .:/app
+      - ./backend:/app
 
     command: >
       sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
-    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    container_name: microblog_frontend
 
+    ports:
+      - "8080:80"
+
+    depends_on:
+      - backend
 
 volumes:
   microblog_pg_data:
