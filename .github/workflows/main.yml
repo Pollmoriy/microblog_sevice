@@ -24,7 +24,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Lint (flake8)
-        run: flake8 backend max-line-length = 120
+        run: flake8 backend
   
 
       - name: Type check (mypy)
