@@ -36,7 +36,7 @@ async def create_tweet(
     tweet = await create_tweet_service(
         tweet_data=tweet_data, current_user=current_user, db=db
     )
-    return TweetResponse(tweet_id=tweet.id)
+    return TweetResponse(tweet_id=int(tweet.id))
 
 
 @router.delete("/tweets/{tweet_id}")
@@ -69,7 +69,7 @@ async def upload_media(
     current_user=Depends(get_current_user),
 ):
     media = await save_media_service(file=file, db=db)
-    return MediaResponse(media_id=media.id)
+    return MediaResponse(media_id=int(media.id))
 
 
 @router.post("/tweets/{tweet_id}/likes")

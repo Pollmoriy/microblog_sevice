@@ -1,8 +1,8 @@
 import os
 from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql+asyncpg://admin:admin@localhost:5432/microblog"
@@ -10,10 +10,10 @@ DATABASE_URL = os.getenv(
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
-    expire_on_commit=False,
+    expire_on_commit=False
 )
 
 Base = declarative_base()
