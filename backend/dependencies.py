@@ -1,5 +1,5 @@
-from backend import models
-from backend.database import get_db
+import models
+from database import get_db
 from fastapi import Depends, Header, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

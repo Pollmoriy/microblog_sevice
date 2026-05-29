@@ -1,14 +1,14 @@
-from backend.database import get_db
-from backend.dependencies import get_current_user
+from database import get_db
+from dependencies import get_current_user
 from fastapi import APIRouter, Depends, File, UploadFile, status
-from backend.schemas import (
+from schemas import (
     MediaResponse,
     TweetCreate,
     TweetResponse,
     UserCreate,
     UserResponse,
 )
-from backend.services import (
+from services import (
     create_tweet_service,
     create_user_service,
     delete_tweet_service,
