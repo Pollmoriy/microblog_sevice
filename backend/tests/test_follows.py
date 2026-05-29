@@ -1,7 +1,6 @@
 import pytest
 
-from conftest import create_user
-
+from utils import create_user
 
 @pytest.mark.asyncio
 async def test_follow_user(client):

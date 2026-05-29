@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -8,8 +10,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from backend.database import Base, get_db
-from backend.main import app
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from database import Base, get_db
+from main import app
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
