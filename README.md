@@ -331,10 +331,59 @@ mypy backend
 
 ---
 
-# ✅ Запуск тестов
+# 🧪 Запуск тестов
+
+## ⚙️ Важно перед запуском
+
+Тесты используют отдельную тестовую базу данных:
 
 ```bash
-pytest backend
+TEST_DATABASE_URL=postgresql+asyncpg://admin:admin@localhost:5433/test_microblog
+```
+
+Убедитесь, что:
+
+- запущен PostgreSQL (через docker-compose)
+- создана база `test_microblog`
+- backend контейнер может подключиться к БД
+
+---
+
+## 🐳 Рекомендуемый способ запуска (Docker)
+
+### ▶️ Запуск всех тестов
+
+```bash
+docker-compose run --rm backend pytest -vv -s
+```
+
+---
+
+### ▶️ Запуск конкретного файла тестов
+
+```bash
+docker-compose run --rm backend pytest tests/test_users.py -vv -s
+```
+
+---
+
+## 🧠 Проверка окружения
+
+```bash
+docker ps
+echo $TEST_DATABASE_URL
+```
+
+---
+
+## ✅ Ожидаемый результат
+
+```
+collected 3 items
+
+tests/test_users.py ... [100%]
+
+3 passed
 ```
 
 ---
