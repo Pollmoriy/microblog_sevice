@@ -5,10 +5,25 @@ on:
     branches: [ master ]
   push:
     branches: [ master ]
-    
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: test_microblog
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U admin -d test_microblog"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +40,6 @@ jobs:
 
       - name: Lint (flake8)
         run: flake8 backend
-  
 
       - name: Type check (mypy)
         run: |
@@ -33,6 +47,9 @@ jobs:
           mypy .
 
       - name: Tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://admin:admin@postgres:5432/test_microblog
+          TEST_DATABASE_URL: postgresql+asyncpg://admin:admin@postgres:5432/test_microblog
         run: |
           cd backend
           pytest
