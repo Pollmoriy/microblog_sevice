@@ -23,10 +23,11 @@ jobs:
           --health-cmd="pg_isready -U admin -d test_microblog"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,18 +39,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Set environment variables
+        run: echo "ENV ready"
+
       - name: Lint (flake8)
         run: flake8 backend
 
       - name: Type check (mypy)
+        env:
+          DATABASE_URL: postgresql+asyncpg://admin:admin@localhost:5432/test_microblog
         run: |
           cd backend
           mypy .
 
-      - name: Tests
+      - name: Run tests
         env:
-          DATABASE_URL: postgresql+asyncpg://admin:admin@postgres:5432/test_microblog
-          TEST_DATABASE_URL: postgresql+asyncpg://admin:admin@postgres:5432/test_microblog
+          DATABASE_URL: postgresql+asyncpg://admin:admin@localhost:5432/test_microblog
+          TEST_DATABASE_URL: postgresql+asyncpg://admin:admin@localhost:5432/test_microblog
         run: |
           cd backend
-          pytest
+          pytest -q
