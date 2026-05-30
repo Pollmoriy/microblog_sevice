@@ -3,24 +3,29 @@ import sys
 from pathlib import Path
 
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from database import Base, get_db
 from main import app
 
+
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
     "postgresql+asyncpg://admin:admin@localhost:5433/test_microblog",
 )
 
-engine_test = create_async_engine(TEST_DATABASE_URL)
+engine_test = create_async_engine(
+    TEST_DATABASE_URL,
+    poolclass=NullPool,
+)
 
 TestingSessionLocal = async_sessionmaker(
     bind=engine_test,
@@ -38,10 +43,23 @@ app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def prepare_db():
+async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
+    yield
+
+    async with engine_test.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+    await engine_test.dispose()
+
+
+@pytest_asyncio.fixture
+async def db_session():
+    async with TestingSessionLocal() as session:
+        yield session
 
 
 @pytest_asyncio.fixture
@@ -53,6 +71,7 @@ async def client():
         base_url="http://test",
     ) as ac:
         yield ac
+
 
 async def create_user(client, name):
     response = await client.post(
