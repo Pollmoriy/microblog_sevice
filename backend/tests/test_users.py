@@ -1,6 +1,6 @@
 import pytest
-
 from tests.test_helpers import create_user
+
 
 @pytest.mark.asyncio
 async def test_create_user(client):
