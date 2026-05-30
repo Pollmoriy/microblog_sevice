@@ -28,7 +28,11 @@ jobs:
   
 
       - name: Type check (mypy)
-        run: mypy backend
+        run: |
+          cd backend
+          mypy .
 
       - name: Tests
-        run: pytest backend
+        run: |
+          cd backend
+          pytest
