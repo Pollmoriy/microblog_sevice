@@ -1,21 +1,17 @@
 import os
-import sys
-from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
 from sqlalchemy.pool import NullPool
-from database import Base, get_db
-from main import app
+from backend.main import app
+from backend.database import Base, get_db
 
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://admin:admin@localhost:5433/test_microblog",
+    "postgresql+asyncpg://admin:admin@test_db:5432/test_microblog",
 )
 
 engine_test = create_async_engine(

@@ -308,25 +308,25 @@ POST /api/users
 ## Black
 
 ```bash
-black backend
+black backend1
 ```
 
 ## Isort
 
 ```bash
-isort backend
+isort backend1
 ```
 
 ## Flake8
 
 ```bash
-flake8 backend
+flake8 backend1
 ```
 
 ## Mypy
 
 ```bash
-mypy backend
+mypy backend1
 ```
 
 ---
@@ -354,7 +354,7 @@ TEST_DATABASE_URL=postgresql+asyncpg://admin:admin@localhost:5433/test_microblog
 ### ▶️ Запуск всех тестов
 
 ```bash
-docker-compose run --rm backend pytest -vv -s
+docker-compose run --rm backend1 pytest -vv -s
 ```
 
 ---
@@ -362,7 +362,7 @@ docker-compose run --rm backend pytest -vv -s
 ### ▶️ Запуск конкретного файла тестов
 
 ```bash
-docker-compose run --rm backend pytest tests/test_users.py -vv -s
+docker-compose run --rm backend1 pytest tests/test_users.py -vv -s
 ```
 
 ---

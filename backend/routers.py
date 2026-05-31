@@ -1,13 +1,13 @@
-from database import get_db
-from dependencies import get_current_user
+from backend.database import get_db
+from backend.dependencies import get_current_user
 from fastapi import APIRouter, Depends, File, UploadFile, status
-from schemas import (MediaResponse, TweetCreate, TweetResponse, UserCreate,
-                     UserResponse)
-from services import (create_tweet_service, create_user_service,
-                      delete_tweet_service, follow_user_service,
-                      get_feed_service, get_user_profile_service,
-                      like_tweet_service, save_media_service,
-                      unfollow_user_service, unlike_tweet_service)
+from backend.schemas import (MediaResponse, TweetCreate, TweetResponse, UserCreate,
+                             UserResponse)
+from backend.services import (create_tweet_service, create_user_service,
+                              delete_tweet_service, follow_user_service,
+                              get_feed_service, get_user_profile_service,
+                              like_tweet_service, save_media_service,
+                              unfollow_user_service, unlike_tweet_service)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/api", tags=["API"])

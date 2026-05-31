@@ -2,11 +2,11 @@ import os
 import uuid
 
 from fastapi import HTTPException, UploadFile, status
-from models import Follow, Like, Media, Tweet, TweetMedia, User
+from backend.models import Follow, Like, Media, Tweet, TweetMedia, User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from utils.auth import generate_api_key
+from backend.utils.auth import generate_api_key
 
 UPLOAD_DIR = "../frontend/app/media"
 
