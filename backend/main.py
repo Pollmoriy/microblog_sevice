@@ -1,8 +1,8 @@
-from backend import models
-from backend.database import engine
+import models
+from database import engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import router
+from routers import router
 
 app = FastAPI()
 
