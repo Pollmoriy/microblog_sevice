@@ -43,7 +43,7 @@ jobs:
         run: echo "ENV ready"
 
       - name: Lint (flake8)
-        run: flake8 backend1
+        run: flake8 backend
 
       - name: Type check (mypy)
         env:
