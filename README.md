@@ -362,7 +362,7 @@ docker-compose run --rm backend1 pytest -vv -s
 ### ▶️ Запуск конкретного файла тестов
 
 ```bash
-docker-compose run --rm backend1 pytest tests/test_users.py -vv -s
+docker-compose run --rm backend pytest tests/test_users.py -vv -s
 ```
 
 ---
