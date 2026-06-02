@@ -26,6 +26,7 @@ class ErrorResponse(BaseModel):
 
 class UserCreate(BaseModel):
     name: str
+    api_key: str
 
 
 class UserResponse(BaseModel):

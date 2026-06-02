@@ -1,3 +1,5 @@
+import hashlib
+
 import models
 from database import get_db
 from fastapi import Depends, Header, HTTPException
@@ -6,9 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_current_user(
-    api_key: str = Header(..., alias="api-key"), db: AsyncSession = Depends(get_db)
+    api_key: str = Header(..., alias="api-key"),
+    db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(models.User).where(models.User.api_key == api_key))
+    hashed = hashlib.sha256(api_key.encode()).hexdigest()
+
+    result = await db.execute(
+        select(models.User).where(models.User.api_key == hashed)
+    )
+
     user = result.scalar_one_or_none()
 
     if not user:

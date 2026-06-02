@@ -116,8 +116,7 @@ async def get_user(
     return await get_user_profile_service(db, user_id)
 
 
-@router.post("/users", response_model=UserResponse)
+@router.post("/users")
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    new_user = await create_user_service(db, user.name)
-
-    return UserResponse(id=new_user.id, name=new_user.name, api_key=new_user.api_key)
+    new_user = await create_user_service(db, user.name, user.api_key)
+    return new_user
