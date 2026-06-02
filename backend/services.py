@@ -1,4 +1,5 @@
 import os
+from os.path import basename
 import uuid
 import hashlib
 from fastapi import HTTPException, UploadFile, status
@@ -7,7 +8,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-UPLOAD_DIR = "../frontend/app/media"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MEDIA_DIR = os.path.join(BASE_DIR, "media")
+
+UPLOAD_DIR = MEDIA_DIR
 
 
 async def create_tweet_service(tweet_data, current_user, db: AsyncSession) -> Tweet:
@@ -44,22 +48,28 @@ async def save_media_service(file: UploadFile, db: AsyncSession) -> Media:
 
     if not file.filename:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Filename is missing"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Filename is missing",
         )
 
     file_extension = file.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+    full_file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
     content = await file.read()
 
-    with open(file_path, "wb") as buffer:
+    with open(full_file_path, "wb") as buffer:
         buffer.write(content)
 
-    media = Media(file_path=file_path)
+    media = Media(
+        file_path=unique_filename
+    )
+
     db.add(media)
     await db.commit()
     await db.refresh(media)
+
     return media
 
 
@@ -206,11 +216,13 @@ async def get_feed_service(db, user_id: int):
 
     tweets = tweets_result.scalars().all()
 
+    BASE_URL = "http://localhost:8000"
+
     def build_tweet(tweet):
         return {
             "id": tweet.id,
             "content": tweet.content,
-            "attachments": [tm.media.file_path for tm in tweet.tweet_media],
+            "attachments": [f"{BASE_URL}/media/{tm.media.file_path.split('/')[-1]}" for tm in tweet.tweet_media],
             "author": {
                 "id": tweet.author.id,
                 "name": tweet.author.name,
